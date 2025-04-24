@@ -378,6 +378,8 @@ const guideScreens = {
 let currentEmployeeType = null;
 let conversationStage = 0;
 let positiveResponseCount = 0; // 사장님의 긍정적 대답 횟수를 추적
+let goodEvaluationCount = 0;
+let againEvaluationCount = 0;
 
 // 교육적 메시지 표시 여부 플래그
 let educationalMessageShown = {
@@ -443,6 +445,8 @@ backButton.addEventListener('click', () => {
     currentEmployeeType = null;
     conversationStage = 0;
     positiveResponseCount = 0; // 긍정적 응답 카운트 초기화
+    goodEvaluationCount = 0;
+    againEvaluationCount = 0;
 });
 
 // 메시지 전송 버튼 이벤트 리스너
@@ -471,6 +475,8 @@ function startConversation(type) {
     // 대화 단계 초기화
     conversationStage = 0;
     positiveResponseCount = 0; // 긍정적 응답 카운트 초기화
+    goodEvaluationCount = 0;
+    againEvaluationCount = 0;
     
     // 교육적 메시지 플래그 초기화
     educationalMessageShown = {
@@ -516,9 +522,12 @@ function sendMessage() {
     const currentStage = conversationStage % 5;
     const evaluation = evaluateUserResponse(message, currentStage);
     
-    // 긍정적 응답 카운트 증가 (Good 평가인 경우)
+    // 평가 결과 카운트 업데이트
     if (evaluation === 'Good') {
         positiveResponseCount++;
+        goodEvaluationCount++;
+    } else if (evaluation === 'Again') {
+        againEvaluationCount++;
     }
     
     // 사용자 메시지 추가 (평가 결과 포함)
@@ -526,6 +535,14 @@ function sendMessage() {
     
     // 입력창 초기화
     messageInput.value = '';
+    
+    // 5단계 대화 후 최종 평가 메시지 표시
+    if (conversationStage >= 4) {
+        setTimeout(() => {
+            showFinalEvaluation();
+        }, 1000);
+        return;
+    }
     
     // 직원 응답
     setTimeout(() => {
@@ -831,6 +848,90 @@ function showDisobedienceEducationalMessage() {
         educationalMessageElement.classList.add('fade-out');
         setTimeout(() => {
             educationalMessageElement.remove();
+        }, 500);
+    });
+}
+
+// 최종 평가 메시지 표시 함수 수정
+function showFinalEvaluation() {
+    if (document.querySelector('.final-evaluation-message')) {
+        return;
+    }
+    
+    const finalEvaluationElement = document.createElement('div');
+    finalEvaluationElement.classList.add('educational-message', 'final-evaluation-message');
+    
+    let messageTitle = "";
+    let messageContent = "";
+    let dominantEvaluation = "";
+    let dominantCount = 0;
+    let dominantClass = "";
+    
+    // 가장 많이 나온 평가 결과 계산
+    const normalCount = conversationStage + 1 - goodEvaluationCount - againEvaluationCount;
+    
+    if (goodEvaluationCount >= againEvaluationCount && goodEvaluationCount >= normalCount) {
+        dominantEvaluation = "좋음";
+        dominantCount = goodEvaluationCount;
+        dominantClass = "good-count";
+    } else if (againEvaluationCount >= goodEvaluationCount && againEvaluationCount >= normalCount) {
+        dominantEvaluation = "다시";
+        dominantCount = againEvaluationCount;
+        dominantClass = "again-count";
+    } else {
+        dominantEvaluation = "보통";
+        dominantCount = normalCount;
+        dominantClass = "normal-count";
+    }
+    
+    if (goodEvaluationCount >= 3) {
+        messageTitle = "참 잘했어요";
+        messageContent = "효과적인 대화 방식으로 직원과의 소통에 성공했습니다. 이런 대화 방식은 신뢰 관계 구축과 문제 해결에 큰 도움이 됩니다.";
+    } else if (againEvaluationCount >= 3) {
+        messageTitle = "대화 방식의 수정이 필요하겠습니다";
+        messageContent = "대화 과정에서 개선이 필요한 부분이 있습니다. 직원의 의견을 더 경청하고 공감적인 태도로 접근해보세요.";
+    } else {
+        messageTitle = "조금만 더 신경써주세요";
+        messageContent = "대화가 적절히 이루어지고 있지만, 더 효과적인 소통을 위해 직원의 감정과 상황에 조금 더 주의를 기울여 보세요.";
+    }
+    
+    const messageHtml = `
+        <h3><i class="fas fa-award"></i> ${messageTitle}</h3>
+        <div class="evaluation-summary">
+            <div class="evaluation-count ${dominantClass}">${dominantEvaluation}: ${dominantCount}</div>
+        </div>
+        <p>${messageContent}</p>
+        <button id="continue-conversation">계속하기 <i class="fas fa-arrow-right"></i></button>
+        <button id="restart-conversation">다시 시작하기 <i class="fas fa-redo"></i></button>
+    `;
+    
+    finalEvaluationElement.innerHTML = messageHtml;
+    document.querySelector('.container').appendChild(finalEvaluationElement);
+    
+    document.getElementById('continue-conversation').addEventListener('click', () => {
+        finalEvaluationElement.classList.add('fade-out');
+        setTimeout(() => {
+            finalEvaluationElement.remove();
+            // 직원 응답 계속
+            respondToMessage("", null);
+        }, 500);
+    });
+    
+    document.getElementById('restart-conversation').addEventListener('click', () => {
+        finalEvaluationElement.classList.add('fade-out');
+        setTimeout(() => {
+            finalEvaluationElement.remove();
+            // 처음 선택 화면으로 돌아가기
+            conversationScreen.classList.remove('active');
+            selectionScreen.classList.add('active');
+            // 변수 초기화
+            conversationStage = 0;
+            positiveResponseCount = 0;
+            goodEvaluationCount = 0;
+            againEvaluationCount = 0;
+            currentEmployeeType = null;
+            // 메시지 초기화
+            messagesContainer.innerHTML = '';
         }, 500);
     });
 } 

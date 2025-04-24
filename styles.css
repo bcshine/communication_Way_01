@@ -817,4 +817,92 @@ button:active {
         background-color: #2c2c2c;
         color: var(--text-light);
     }
+}
+
+/* 최종 평가 메시지 스타일 */
+.final-evaluation-message {
+    color: white;
+}
+
+.final-evaluation-message h3 {
+    font-size: 2.5rem;
+    color: white;
+    margin-bottom: 30px;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: 800;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    padding: 15px 0;
+    position: relative;
+}
+
+.final-evaluation-message h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.final-evaluation-message h3 i {
+    margin-right: 15px;
+    color: var(--secondary-color);
+    font-size: 2.2rem;
+    vertical-align: middle;
+}
+
+.final-evaluation-message p {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin: 25px 0;
+    text-align: center;
+    color: white;
+    padding: 0 20px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.evaluation-summary {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.evaluation-count {
+    padding: 15px 40px;
+    border-radius: 30px;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: white;
+    text-align: center;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 200px;
+    display: inline-block;
+}
+
+#continue-conversation, #restart-conversation {
+    margin: 10px auto;
+    width: 80%;
+}
+
+#restart-conversation {
+    background: linear-gradient(135deg, var(--warning-color), var(--warning-color));
+}
+
+@media (prefers-color-scheme: dark) {
+    .evaluation-summary {
+        background-color: #2c2c2c;
+    }
 } 
